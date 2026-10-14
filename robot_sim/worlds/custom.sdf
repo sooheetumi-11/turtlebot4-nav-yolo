@@ -1,0 +1,357 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  custom.sdf — World 10 x 10 m, bố cục hành lang chữ U
+  Cùng kích thước nền với demo.sdf nhưng bố trí vật cản khác:
+    - 4 tường bao quanh (giống demo)
+    - Vách ngăn tạo hành lang chữ U ở giữa
+    - 4 trụ cột hình trụ ở 4 góc trong
+    - 3 hộp chướng ngại vật rải rác
+    - 2 trụ nhỏ hình trụ ở lối đi
+-->
+<sdf version="1.8">
+  <world name="custom">
+
+    <!-- Physics & Plugins -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin filename="ignition-gazebo-physics-system"           name="ignition::gazebo::systems::Physics" />
+    <plugin filename="ignition-gazebo-user-commands-system"     name="ignition::gazebo::systems::UserCommands" />
+    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster" />
+    <plugin filename="ignition-gazebo-sensors-system"           name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="ignition-gazebo-imu-system"               name="ignition::gazebo::systems::Imu" />
+
+    <gravity>0 0 -9.81</gravity>
+
+    <!-- Scene -->
+    <scene>
+      <ambient>0.55 0.55 0.6 1</ambient>
+      <background>0.78 0.88 0.96 1</background>
+    </scene>
+
+    <!-- Light -->
+    <light name="sun" type="directional">
+      <pose>0 0 12 0 0 0</pose>
+      <diffuse>0.95 0.95 0.95 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.4 0.2 -0.8</direction>
+      <cast_shadows>true</cast_shadows>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+    </light>
+
+    <!-- Ground (20x20, same as demo) -->
+    <model name="ground">
+      <static>true</static>
+      <pose>0 0 -0.05 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>20 20 0.1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>20 20 0.1</size></box></geometry>
+          <material>
+            <ambient>0.68 0.70 0.65 1</ambient>
+            <diffuse>0.68 0.70 0.65 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 4 outer walls (10x10 m room, same size as demo) -->
+    <model name="wall_north">
+      <static>true</static>
+      <pose>0.0 5.0 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>10.2 0.2 1.2</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>10.2 0.2 1.2</size></box></geometry>
+          <material>
+            <ambient>0.80 0.72 0.58 1</ambient>
+            <diffuse>0.80 0.72 0.58 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_south">
+      <static>true</static>
+      <pose>0.0 -5.0 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>10.2 0.2 1.2</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>10.2 0.2 1.2</size></box></geometry>
+          <material>
+            <ambient>0.80 0.72 0.58 1</ambient>
+            <diffuse>0.80 0.72 0.58 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_east">
+      <static>true</static>
+      <pose>5.0 0.0 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.2 10.0 1.2</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 10.0 1.2</size></box></geometry>
+          <material>
+            <ambient>0.80 0.72 0.58 1</ambient>
+            <diffuse>0.80 0.72 0.58 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_west">
+      <static>true</static>
+      <pose>-5.0 0.0 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.2 10.0 1.2</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 10.0 1.2</size></box></geometry>
+          <material>
+            <ambient>0.80 0.72 0.58 1</ambient>
+            <diffuse>0.80 0.72 0.58 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- U-shaped corridor walls
+         Nằm ở nửa phía Bắc map, lối mở hướng Nam.
+         Left arm:  x=-2, y từ 0 đến 3  (center y=1.5, length 3m)
+         Right arm: x= 2, y từ 0 đến 3  (center y=1.5, length 3m)
+         Top bar:   y= 3, x từ -2 đến 2 (length 4.2m)
+         → Robot spawn (0,0) nằm ngoài U, đi vào qua lối mở ở y=0 -->
+    <model name="u_left_arm">
+      <static>true</static>
+      <!-- center: x=-2, y=1.5, length=3m → y: 0 to 3 -->
+      <pose>-2.0 1.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.2 3.0 1.2</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 3.0 1.2</size></box></geometry>
+          <material>
+            <ambient>0.28 0.45 0.65 1</ambient>
+            <diffuse>0.28 0.45 0.65 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="u_right_arm">
+      <static>true</static>
+      <!-- center: x=2, y=1.5, length=3m → y: 0 to 3 -->
+      <pose>2.0 1.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.2 3.0 1.2</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 3.0 1.2</size></box></geometry>
+          <material>
+            <ambient>0.28 0.45 0.65 1</ambient>
+            <diffuse>0.28 0.45 0.65 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="u_top_bar">
+      <static>true</static>
+      <!-- Đáy chữ U tại y=3 -->
+      <pose>0.0 3.0 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>4.2 0.2 1.2</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>4.2 0.2 1.2</size></box></geometry>
+          <material>
+            <ambient>0.28 0.45 0.65 1</ambient>
+            <diffuse>0.28 0.45 0.65 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 4 cylindrical pillars at inner corners -->
+    <model name="pillar_nw">
+      <static>true</static>
+      <pose>-3.5 3.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+          <material>
+            <ambient>0.65 0.25 0.25 1</ambient>
+            <diffuse>0.65 0.25 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="pillar_ne">
+      <static>true</static>
+      <pose>3.5 3.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+          <material>
+            <ambient>0.65 0.25 0.25 1</ambient>
+            <diffuse>0.65 0.25 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="pillar_sw">
+      <static>true</static>
+      <pose>-3.5 -3.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+          <material>
+            <ambient>0.65 0.25 0.25 1</ambient>
+            <diffuse>0.65 0.25 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="pillar_se">
+      <static>true</static>
+      <pose>3.5 -3.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.2</radius><length>1.2</length></cylinder></geometry>
+          <material>
+            <ambient>0.65 0.25 0.25 1</ambient>
+            <diffuse>0.65 0.25 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 3 box obstacles scattered around -->
+    <!-- Large box northwest -->
+    <model name="box_nw">
+      <static>true</static>
+      <pose>-3.5 2.5 0.35 0 0 0.4</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.9 0.5 0.7</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.9 0.5 0.7</size></box></geometry>
+          <material>
+            <ambient>0.22 0.60 0.40 1</ambient>
+            <diffuse>0.22 0.60 0.40 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Small box northeast -->
+    <model name="box_ne">
+      <static>true</static>
+      <pose>3.3 2.8 0.25 0 0 0.8</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.6 0.6 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.6 0.6 0.5</size></box></geometry>
+          <material>
+            <ambient>0.22 0.60 0.40 1</ambient>
+            <diffuse>0.22 0.60 0.40 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Long horizontal box east -->
+    <model name="box_east_long">
+      <static>true</static>
+      <pose>3.8 -1.5 0.3 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.4 1.8 0.6</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 1.8 0.6</size></box></geometry>
+          <material>
+            <ambient>0.22 0.60 0.40 1</ambient>
+            <diffuse>0.22 0.60 0.40 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 2 small posts inside the U corridor -->
+    <model name="post_corridor_left">
+      <static>true</static>
+      <pose>-0.8 -2.5 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.12</radius><length>0.8</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>0.8</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.55 0.15 1</ambient>
+            <diffuse>0.85 0.55 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="post_corridor_right">
+      <static>true</static>
+      <pose>0.8 -2.5 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.12</radius><length>0.8</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>0.8</length></cylinder></geometry>
+          <material>
+            <ambient>0.85 0.55 0.15 1</ambient>
+            <diffuse>0.85 0.55 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
