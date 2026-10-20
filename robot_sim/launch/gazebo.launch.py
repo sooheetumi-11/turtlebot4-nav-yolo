@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Run a local SDF world; no Gazebo Fuel models or network access required."""
+"""Run a bundled SDF world; Fuel model downloads may require network access."""
 
 from pathlib import Path
 import os

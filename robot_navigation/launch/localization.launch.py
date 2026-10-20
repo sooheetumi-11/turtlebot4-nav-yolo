@@ -42,7 +42,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'map',
             default_value=PathJoinSubstitution([
-                FindPackageShare('robot_sim'), 'maps', 'demo.yaml']),
+                share, 'maps', 'my_custom_map.yaml']),
             description='Saved occupancy map YAML to load for localization'),
         DeclareLaunchArgument(
             'params_file',

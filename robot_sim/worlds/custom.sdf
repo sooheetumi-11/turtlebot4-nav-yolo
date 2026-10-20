@@ -353,5 +353,31 @@
       </link>
     </model>
 
+    <!-- Các vật thể thực tế thuộc 80 class COCO để YOLOv8 nhận diện -->
+    <!-- Đặt static=true để Gazebo không phải tính toán động học/va chạm phức tạp (tối ưu RTF 100%) -->
+    <!-- Vật thể 1 (Goal 1): Người đứng đối diện robot khi đến điểm 1 -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/standing person/3</uri>
+      <name>target_person</name>
+      <static>true</static>
+      <pose>0.0 2.75 0.0 0 0 -1.57</pose>
+    </include>
+
+    <!-- Vật thể 2 (Goal 2): Biển báo Stop Sign đối diện robot khi đến điểm 2 -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/stop sign/3</uri>
+      <name>target_stop_sign</name>
+      <static>true</static>
+      <pose>0.0 -2.5 0.0 0 0 1.57</pose>
+    </include>
+
+    <!-- Vật thể 3 (Goal 3): Chiếc ghế (Chair) đối diện robot khi đến điểm 3 -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/chair/3</uri>
+      <name>target_chair</name>
+      <static>true</static>
+      <pose>3.7 -1.5 0.0 0 0 3.14</pose>
+    </include>
+
   </world>
 </sdf>
