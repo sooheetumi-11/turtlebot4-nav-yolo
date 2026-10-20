@@ -1,27 +1,32 @@
-# TurtleBot 4 Simulation, Navigation and YOLO
+# Mô phỏng TurtleBot 4, điều hướng Nav2 và nhận diện YOLO
 
-ROS 2 Humble workspace for simulating a TurtleBot 4 in Gazebo Fortress, creating or loading an occupancy map, localizing with AMCL, navigating with Nav2, and detecting objects from the robot camera with YOLOv8.
+Workspace ROS 2 Humble mô phỏng TurtleBot 4 trên Gazebo Fortress, hỗ trợ tạo hoặc nạp bản đồ, định vị bằng AMCL, điều hướng bằng Nav2 và nhận diện vật thể từ camera bằng YOLOv8.
 
-## Repository contents
+## Cấu trúc repository
 
-| Package | Purpose |
+| Package | Chức năng |
 | --- | --- |
-| `robot_description` | TurtleBot 4 / Create 3 Xacro model, meshes, sensor frames and simulation plugins. |
-| `robot_sim` | Gazebo Fortress worlds, robot spawning and ROS–Gazebo topic bridges. The `custom` world includes COCO objects for YOLO demonstrations. |
-| `robot_node` | Keyboard teleoperation and the `nav2_yolo_patrol` Python node. The patrol visits three configured map poses while YOLO processes camera images. |
-| `robot_mapping` | SLAM Toolbox launch/configuration and map saving. |
-| `robot_navigation` | Nav2 parameters, AMCL/navigation launch files, RViz configuration and example occupancy maps. |
+| `robot_description` | Mô hình Xacro TurtleBot 4 / Create 3, mesh, frame cảm biến và plugin mô phỏng. |
+| `robot_sim` | World Gazebo Fortress, tạo robot và bridge topic giữa ROS với Gazebo. World `custom` có các vật thể thuộc COCO để thử YOLO. |
+| `robot_node` | Điều khiển robot bằng bàn phím và node `nav2_yolo_patrol` để đi qua ba điểm trong khi nhận diện ảnh camera. |
+| `robot_mapping` | Launch/configuration cho SLAM Toolbox và lưu bản đồ. |
+| `robot_navigation` | Tham số Nav2, launch AMCL/Navigation, cấu hình RViz và các bản đồ mẫu. |
 
-The provided maps are `robot_navigation/maps/my_custom_map.yaml` with its image `my_custom_map.pgm`, and `my_map.yaml` with `my_map.pgm`. The YAML image paths are relative to the YAML files.
+Các bản đồ có sẵn:
 
-## Requirements
+- `robot_navigation/maps/my_custom_map.yaml` và ảnh bản đồ `my_custom_map.pgm`.
+- `robot_navigation/maps/my_map.yaml` và ảnh bản đồ `my_map.pgm`.
 
-- Ubuntu 22.04 and ROS 2 Humble
-- Gazebo Fortress and ROS–Gazebo integration
-- Nav2, SLAM Toolbox, Xacro, RViz and TurtleBot description dependencies
-- Python OpenCV, `cv_bridge`, and Ultralytics YOLO
+Đường dẫn ảnh trong mỗi file YAML là đường dẫn tương đối tính từ thư mục chứa YAML đó.
 
-Install the ROS dependencies:
+## Yêu cầu
+
+- Ubuntu 22.04 và ROS 2 Humble.
+- Gazebo Fortress và ROS–Gazebo integration.
+- Nav2, SLAM Toolbox, Xacro, RViz và các dependency của mô hình TurtleBot.
+- OpenCV cho Python, `cv_bridge` và Ultralytics YOLO.
+
+Cài đặt các gói ROS và công cụ cần thiết:
 
 ```bash
 sudo apt update
@@ -34,14 +39,14 @@ sudo apt install -y git python3-pip python3-venv python3-opencv \
   ros-humble-nav2-simple-commander ros-humble-cv-bridge
 ```
 
-## Clone and build
+## Clone và build workspace
 
-The repository root is intended to be the workspace `src` directory:
+Thư mục gốc repository này được dùng làm thư mục `src` của workspace:
 
 ```bash
 mkdir -p ~/workspaces/turtlebot4_ws/src
 cd ~/workspaces/turtlebot4_ws/src
-git clone https://github.com/sooheetumi-11/turtlebot4_simulation.git .
+git clone https://github.com/sooheetumi-11/turtlebot4_simulation.git 
 
 cd ~/workspaces/turtlebot4_ws
 source /opt/ros/humble/setup.bash
@@ -50,7 +55,7 @@ rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 ```
 
-Create a virtual environment that can still import the ROS Python packages, then install Ultralytics. Activate this environment in the terminal used to run the YOLO node:
+Tạo môi trường Python ảo có thể sử dụng các gói Python ROS đã cài bằng apt, sau đó cài Ultralytics. Hãy kích hoạt môi trường này trong terminal chạy node YOLO:
 
 ```bash
 cd ~/workspaces/turtlebot4_ws
@@ -60,49 +65,49 @@ python -m pip install --upgrade pip
 python -m pip install 'numpy<2' ultralytics
 ```
 
-For each terminal, source ROS and the workspace. Activate `.venv` in the terminal that runs the detector:
+Trong mỗi terminal chạy ROS, source ROS và workspace. Trong terminal chạy node nhận diện, kích hoạt thêm môi trường `.venv`:
 
 ```bash
 cd ~/workspaces/turtlebot4_ws
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 export ROS_DOMAIN_ID=69
-# In the terminal running YOLO:
+# Chỉ chạy trong terminal khởi chạy node YOLO:
 source .venv/bin/activate
 ```
 
-## Run the simulation, localization and navigation
+## Khởi chạy mô phỏng, định vị và điều hướng
 
-Start a separate terminal for each long-running launch. Keep the simulation and localization alive while Nav2 and the patrol node are running.
+Mở các terminal riêng cho từng launch. Giữ Gazebo và localization chạy trong suốt quá trình Nav2 điều khiển robot.
 
-**Terminal 1 — Gazebo and robot:**
+### Terminal 1 — Gazebo và robot
 
 ```bash
 ros2 launch robot_sim sim.launch.py world:=custom enable_camera:=true
 ```
 
-The custom world references three Open Robotics Fuel models (standing person, stop sign and chair). Gazebo needs network access the first time it downloads these models; after download, Fuel caches them locally.
+World `custom` tham chiếu ba mô hình trên Open Robotics Fuel: người đứng, biển báo dừng và ghế. Gazebo cần kết nối mạng để tải các mô hình lần đầu; sau đó chúng được lưu trong cache Fuel.
 
-**Terminal 2 — map server, AMCL and RViz:**
+### Terminal 2 — Map server, AMCL và RViz
 
 ```bash
 ros2 launch robot_navigation localization.launch.py \
   map:=$PWD/src/robot_navigation/maps/my_custom_map.yaml
 ```
 
-In RViz, select **2D Pose Estimate**, click the robot's approximate position on the map and drag the arrow to match its heading. Wait for AMCL's scan and particle cloud to settle. Keep this launch running.
+Trong RViz, chọn **2D Pose Estimate**, click gần vị trí robot trên bản đồ rồi kéo mũi tên để đặt đúng hướng robot. Chờ scan LiDAR khớp với bản đồ và cụm hạt AMCL ổn định. Giữ launch này chạy.
 
-**Terminal 3 — Nav2:**
+### Terminal 3 — Nav2
 
 ```bash
 ros2 launch robot_navigation navigation.launch.py
 ```
 
-Wait for Nav2 lifecycle nodes to become active before starting the patrol. Localization and navigation are separate launches in this workspace: localization provides `/map` and `map → odom`; Nav2 provides planning and control.
+Chờ các lifecycle node của Nav2 chuyển sang trạng thái `active` trước khi chạy tuần tra. Trong workspace này, localization và navigation được khởi chạy riêng: localization cung cấp `/map` và TF `map → odom`; Nav2 lập kế hoạch và điều khiển robot.
 
-## Run the three-goal YOLO patrol
+## Chạy tuần tra ba điểm và nhận diện YOLO
 
-**Terminal 4 — detector and patrol:**
+### Terminal 4 — Node điều hướng và nhận diện
 
 ```bash
 cd ~/workspaces/turtlebot4_ws
@@ -113,18 +118,18 @@ export ROS_DOMAIN_ID=69
 ros2 launch robot_node nav2_yolo_patrol.launch.py
 ```
 
-The launch defaults to camera topic `/camera/image`, which is the image topic bridged by this repository, and publishes annotated images on `/yolo/detections_image`. To use a different camera topic:
+Launch mặc định nhận ảnh từ `/camera/image` — topic camera mà bridge của repository này phát — và xuất ảnh đã vẽ kết quả lên `/yolo/detections_image`. Nếu camera của bạn dùng topic khác, truyền tên topic khi chạy:
 
 ```bash
 ros2 launch robot_node nav2_yolo_patrol.launch.py \
   camera_topic:=/oakd/rgb/preview/image_raw
 ```
 
-The node loads `yolov8n.pt` (Ultralytics downloads it if it is not already present), displays annotated frames in an OpenCV window, and publishes the annotated stream for RViz. Press `q` in the image window or `Ctrl+C` in the terminal to stop the node.
+Node tải mô hình `yolov8n.pt` (Ultralytics tự tải nếu file chưa có), hiển thị ảnh kèm bounding box trong cửa sổ OpenCV và publish ảnh kết quả để xem trong RViz. Nhấn `q` trên cửa sổ ảnh hoặc `Ctrl+C` trong terminal để dừng node.
 
-### Patrol goals
+### Cấu hình các điểm tuần tra
 
-Edit the `waypoints` list in `robot_node/robot_node/nav2_yolo_patrol.py` to set three `(x, y, yaw)` poses in the map frame. The current example corresponds to the object locations in `robot_sim/worlds/custom.sdf`:
+Sửa danh sách `waypoints` trong `robot_node/robot_node/nav2_yolo_patrol.py`. Mỗi điểm có dạng `(x, y, yaw)` và phải nằm trong frame `map`. Các tọa độ mẫu hiện tại tương ứng với vị trí các vật thể trong `robot_sim/worlds/custom.sdf`:
 
 ```python
 waypoints = [
@@ -134,38 +139,16 @@ waypoints = [
 ]
 ```
 
-Use RViz's **Nav2 Goal** tool and inspect `/goal_pose` to record a pose including heading. `/clicked_point` provides a position only. Rebuild after editing the node if the workspace was built without `--symlink-install`.
+Dùng công cụ **Nav2 Goal** trên RViz và xem topic `/goal_pose` để lấy cả vị trí lẫn hướng. `/clicked_point` chỉ chứa tọa độ điểm, không có hướng. Nếu workspace được build mà không dùng `--symlink-install`, hãy build lại sau khi sửa code.
 
-## Mapping and teleoperation (optional)
 
-To create a new map instead of using a supplied map, start SLAM while the simulation is running:
+## Các giao diện ROS chính
 
-```bash
-ros2 launch robot_mapping mapping.launch.py
-```
+- `/scan`, `/odom`, `/tf`, `/clock`: dữ liệu mô phỏng dùng cho định vị và điều hướng.
+- `/map`, `/initialpose`, `/amcl_pose`: bản đồ và các giao diện định vị AMCL.
+- `/navigate_to_pose`: action Nav2 mà node tuần tra dùng để lần lượt tới từng goal.
+- `/cmd_vel`: lệnh vận tốc Nav2 gửi tới robot qua bridge Gazebo.
+- `/camera/image`: ảnh camera đầu vào của cấu hình repository này.
+- `/yolo/detections_image`: ảnh đã được YOLO vẽ kết quả nhận diện.
 
-In another terminal, drive slowly to scan the area:
-
-```bash
-ros2 run robot_node teleop_keyboard
-```
-
-Save the resulting map while SLAM is still running:
-
-```bash
-ros2 launch robot_mapping save_map.launch.py \
-  map_name:=$PWD/src/robot_navigation/maps/my_custom_map
-```
-
-The map saver writes a YAML and PGM pair. Stop teleoperation and SLAM before starting AMCL with the new map.
-
-## Key interfaces
-
-- `/scan`, `/odom`, `/tf`, `/clock`: simulation data used by localization and navigation.
-- `/map`, `/initialpose`, `/amcl_pose`: map and AMCL localization interfaces.
-- `/navigate_to_pose`: Nav2 action used by the patrol node to visit each goal in sequence.
-- `/cmd_vel`: Nav2 velocity output consumed by the Gazebo bridge.
-- `/camera/image`: camera image input in this repository.
-- `/yolo/detections_image`: annotated image output from the detector.
-
-Do not run keyboard teleoperation while Nav2 is controlling the robot; both would send velocity commands to `/cmd_vel`.
+Không chạy điều khiển bàn phím cùng lúc với Nav2, vì cả hai đều có thể gửi lệnh vận tốc lên `/cmd_vel`.
